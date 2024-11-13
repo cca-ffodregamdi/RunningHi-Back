@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -51,6 +52,12 @@ public class Alarm {
     @Comment(value = "관련 식별 값")
     private Long targetId;
 
+    @ElementCollection
+    @CollectionTable(name = "alarm_additional_data", joinColumns = @JoinColumn(name = "alarm_no"))
+    @MapKeyColumn(name = "data_key")
+    @Column(name = "data_value")
+    private Map<String, String> additionalData;
+
     @Column(name = "is_read", nullable = false)
     @ColumnDefault(value = "false")
     @Comment(value = "확인 여부")
@@ -66,13 +73,14 @@ public class Alarm {
     private LocalDateTime readDate;
 
     @Builder
-    public Alarm(Long id, Member member, String title, AlarmType alarmType, TargetPage targetPage, Long targetId, LocalDateTime readDate) {
+    public Alarm(Long id, Member member, String title, AlarmType alarmType, TargetPage targetPage, Long targetId, Map<String, String> additionalData, LocalDateTime readDate) {
         this.id = id;
         this.member = member;
         this.title = title;
         this.alarmType = alarmType;
         this.targetPage = targetPage;
         this.targetId = targetId;
+        this.additionalData = additionalData;
         this.isRead = false;
         this.createDate = LocalDateTime.now();
         this.readDate = LocalDateTime.now();
