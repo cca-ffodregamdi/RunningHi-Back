@@ -53,7 +53,7 @@ public class Alarm {
     private Long targetId;
 
     @ElementCollection
-    @CollectionTable(name = "alarm_additional_data", joinColumns = @JoinColumn(name = "alarm_no"))
+    @CollectionTable(name = "tbl_alarm_additional_data", joinColumns = @JoinColumn(name = "alarm_no"))
     @MapKeyColumn(name = "data_key")
     @Column(name = "data_value")
     private Map<String, String> additionalData;
