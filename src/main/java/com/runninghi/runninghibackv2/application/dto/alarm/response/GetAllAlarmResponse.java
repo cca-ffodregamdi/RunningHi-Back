@@ -24,6 +24,7 @@ public record GetAllAlarmResponse(
         LocalDateTime createDate
 ) {
         public static GetAllAlarmResponse ofAlarmEntity(Alarm alarm) {
+
                 return new GetAllAlarmResponse(
                         alarm.getId(),
                         alarm.getTitle(),
@@ -33,5 +34,7 @@ public record GetAllAlarmResponse(
                         alarm.isRead(),
                         alarm.getCreateDate()
                 );
+
         }
+
 }

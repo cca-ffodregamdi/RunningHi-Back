@@ -25,7 +25,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -45,13 +47,14 @@ public class ReplyService {
 
     /**
      * 게시글 조회 시 해당 게시글에 대한 댓글들 조회 메소드
+     *
      * @param request 게시글 식별을 위한 키 값
      * @return 댓글들 리스트 ( 댓글 정보)
      */
     @Transactional(readOnly = true)
     public GetContentResponse<List<GetReplyList>> getReplyList(GetReplyListRequest request) {
 
-        List<GetReplyList> replyList =  replyQueryRepository.findAllByPostNo(request);
+        List<GetReplyList> replyList = replyQueryRepository.findAllByPostNo(request);
         replyList.stream()
                 .filter(reply -> reply.getMemberNo().equals(request.getMemberNo()))
                 .forEach(reply -> reply.setIsOwner(true));
@@ -62,7 +65,8 @@ public class ReplyService {
 
     /**
      * '내가 쓴 댓글들' 혹은 '특정 회원이 쓴 댓글들' 조회 메소드
-     * @param  memberNo 작성자 식별을 위한 키 값
+     *
+     * @param memberNo 작성자 식별을 위한 키 값
      * @param sort
      * @return 댓글들
      */
@@ -71,13 +75,14 @@ public class ReplyService {
 
         List<GetReplyList> replyList = replyQueryRepository.findAllByMemberNo(memberNo, sort);
         replyList.stream()
-            .filter(i -> i.getMemberNo().equals(memberNo))
-            .forEach(i -> i.setIsOwner(true));
+                .filter(i -> i.getMemberNo().equals(memberNo))
+                .forEach(i -> i.setIsOwner(true));
         return new GetContentResponse<>(replyList);
     }
 
     /**
      * 댓글 작성 메소드
+     *
      * @param request 댓글 작성에 필요한 정보
      * @return 댓글 번호, 작성자 닉네임, 게시글 번호, 댓글 내용, 삭제 여부, 생성 일, 수정 일
      */
@@ -97,14 +102,18 @@ public class ReplyService {
         Reply savedReply = replyRepository.save(reply);
 
         // 게시물 작성자에게 푸쉬 알림
+        Map<String, String> additionalData = new HashMap<>(Map.of(
+                "replyNo", String.valueOf(savedReply.getReplyNo())
+        ));
         CreateAlarmRequest alarmRequest = CreateAlarmRequest.builder()
-                        .title(POST_REPLY_FCM_TITLE)
-                        .targetMemberNo(savedReply.getPost().getMember().getMemberNo())
-                        .alarmType(AlarmType.REPLY)
-                        .targetPage(TargetPage.POST)
-                        .targetId(savedReply.getPost().getPostNo())
-                        .fcmToken(savedReply.getMember().getFcmToken())
-                        .build();
+                .title(POST_REPLY_FCM_TITLE)
+                .targetMemberNo(savedReply.getPost().getMember().getMemberNo())
+                .alarmType(AlarmType.REPLY)
+                .targetPage(TargetPage.POST)
+                .targetId(savedReply.getPost().getPostNo())
+                .additionalData(additionalData)
+                .fcmToken(savedReply.getMember().getFcmToken())
+                .build();
         alarmService.createPushAlarm(alarmRequest);
 
         return new CreateReplyResponse(likeRepository.countByPost_PostNo(post.getPostNo()));
@@ -112,8 +121,9 @@ public class ReplyService {
 
     /**
      * 댓글 수정 메소드
+     *
      * @param request 회원 식별을 위한 키 값, 회원 역할, 수정할 댓글 키 값, 수정할 댓글 내용
-     * @return  댓글 번호, 작성자 닉네임, 게시글 번호, 댓글 내용, 삭제 여부, 생성 일, 수정 일
+     * @return 댓글 번호, 작성자 닉네임, 게시글 번호, 댓글 내용, 삭제 여부, 생성 일, 수정 일
      */
     @Transactional
     public UpdateReplyResponse updateReply(UpdateReplyRequest request) {
@@ -127,6 +137,7 @@ public class ReplyService {
 
     /**
      * 댓글 삭제 메소드 - 댓글 엔티티의 isDeleted의 상태를 'true' 값으로 변경
+     *
      * @param request {replyNo, role, memberNo}
      */
     @Transactional
@@ -139,6 +150,7 @@ public class ReplyService {
 
     /**
      * 댓글 삭제 메소드 - 댓글 엔티티의 isDeleted의 상태를 'true' 값으로 변경
+     *
      * @param replyNo
      */
     @Transactional
@@ -150,10 +162,11 @@ public class ReplyService {
 
     /**
      * 신고 횟수를 올리는 메소드입니다.
+     *
      * @param replyNo
      */
     @Transactional
-    public void plusReportedCount (Long replyNo) {
+    public void plusReportedCount(Long replyNo) {
 
         Reply reply = findReplyByReplyNo(replyNo);
         reply.addReportedCount();
@@ -161,6 +174,7 @@ public class ReplyService {
 
     /**
      * 신고 횟수를 초기화하는 메소드입니다.
+     *
      * @param replyNo
      */
     public void resetReportedCount(Long replyNo) {
@@ -172,16 +186,16 @@ public class ReplyService {
     @Transactional(readOnly = true)
     public PageResultData<GetReportedReplyResponse> getReportedReplyList(GetReportedReplyRequest request) {
         replyChecker.checkSearchValid(request.search());
-        return  replyQueryRepository.findAllReportedByPageableAndSearch(request);
+        return replyQueryRepository.findAllReportedByPageableAndSearch(request);
     }
 
-    private Reply findReplyByReplyNo (Long replyNo) {
+    private Reply findReplyByReplyNo(Long replyNo) {
 
         return replyRepository.findById(replyNo)
                 .orElseThrow(EntityNotFoundException::new);
     }
 
-    private void checkWriterOrAdmin (Long memberNo, Role role, Reply reply) {
+    private void checkWriterOrAdmin(Long memberNo, Role role, Reply reply) {
 
         boolean checkResult =
                 replyChecker.memberCheck(memberNo, role, reply.getMember().getMemberNo());
