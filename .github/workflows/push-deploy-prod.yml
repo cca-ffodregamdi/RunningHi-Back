@@ -1,4 +1,4 @@
-name: Deploy on Merge
+name: Deploy Prod Branch On Merge
 
 on:
   push:
