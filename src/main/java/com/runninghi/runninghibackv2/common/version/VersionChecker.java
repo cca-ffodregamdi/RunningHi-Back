@@ -24,7 +24,7 @@ public class VersionChecker {
     public ResponseEntity<ApiResult<Map<String, Boolean>>> checkVersion(@RequestParam("ver") String version) {
 
         if (config.getExceptions().contains(version)) {
-            return ResponseEntity.ok(ApiResult.success("테스터 확인 성공", Map.of("isReviewer", true)));
+            return ResponseEntity.ok(ApiResult.success("테스터가 아닙니다.", Map.of("isReviewer", false)));
         }
 
         String[] versionParts = version.split("\\.");
