@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @Builder
@@ -29,8 +31,19 @@ public class CreateAlarmRequest {
         @Schema(description = "관련 식별 값", example = "234")
         private Long targetId;
 
+        @Schema(description = "부가 정보", example = "{\"key1\": \"value1\", \"key2\": \"value2\"}")
+        private Map<String, String> additionalData;
+
         @Schema(description = "FCM 토큰")
         @NotBlank(message = "토큰을 포함시켜주세요.")
         private String fcmToken;
 
+        public CreateAlarmRequest(String title, Long targetMemberNo, AlarmType alarmType, TargetPage targetPage, Long targetId, String fcmToken) {
+                this.title = title;
+                this.targetMemberNo = targetMemberNo;
+                this.alarmType = alarmType;
+                this.targetPage = targetPage;
+                this.targetId = targetId;
+                this.fcmToken = fcmToken;
+        }
 }

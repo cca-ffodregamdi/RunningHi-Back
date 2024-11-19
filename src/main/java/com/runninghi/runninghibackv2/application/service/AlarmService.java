@@ -6,6 +6,7 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.runninghi.runninghibackv2.application.dto.alarm.request.CreateAlarmRequest;
 import com.runninghi.runninghibackv2.application.dto.alarm.response.GetAllAlarmResponse;
+import com.runninghi.runninghibackv2.common.constant.AlarmConstants;
 import com.runninghi.runninghibackv2.common.exception.custom.FcmException;
 import com.runninghi.runninghibackv2.domain.entity.Alarm;
 import com.runninghi.runninghibackv2.domain.entity.Member;
@@ -72,6 +73,7 @@ public class AlarmService {
                 .alarmType(request.getAlarmType())
                 .targetPage(request.getTargetPage())
                 .targetId(request.getTargetId())
+                .additionalData(request.getAdditionalData())
                 .build();
 
         alarmRepository.save(alarm);
@@ -91,11 +93,14 @@ public class AlarmService {
     private void sendPushAlarm(CreateAlarmRequest request) throws FirebaseMessagingException {
 
         Notification notification = Notification.builder()
-                .setTitle(request.getTitle())
+                .setTitle(AlarmConstants.title)
+                .setBody(request.getTitle())
                 .build();
+
         Message message = Message.builder()
                 .setToken(request.getFcmToken())
                 .setNotification(notification)
+                .putAllData(request.getAdditionalData())
                 .build();
 
         firebaseMessaging.send(message);
