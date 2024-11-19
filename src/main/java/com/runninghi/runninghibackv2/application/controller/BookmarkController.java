@@ -31,29 +31,6 @@ public class BookmarkController {
     private final static String POST_RESPONSE_MESSAGE = "북마크 생성 성공";
     private final static String DELETE_RESPONSE_MESSAGE = "북마크 취소 성공";
 
-    /**
-     * 북마크 탭 클릭 시 요청한 사용자의 북마크된 Post들을 응답해주는 메소드입니다.
-     * -> 만약 다른 회원의 북마크 리스트를 보게 한다면 리팩토링 필요
-     * @param bearerToken 사용자 인증을 위한 Bearer 토큰입니다. 헤더에 포함되어야 합니다.
-     * @return Bookmark 테이블에서 조회된 Posts 반환합니다.
-     * @apiNote 이 메서드를 사용하기 위해서는 요청 헤더에 유효한 Bearer 토큰이 포함되어야 합니다.
-     *          토큰이 유효하지 않거나, 토큰에 해당하는 사용자가 존재하지 않을 경우 접근이 거부됩니다.
-     */
-//    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-//    @Operation(
-//            summary = "북마크된 게시물 리스트 조회",
-//            description = "사용자의 북마크된 게시글들을 조회합니다. <br /> 사용자의 북마크 게시물의 리스트를 반환합니다. ",
-//            responses = @ApiResponse(responseCode = "200", description = GET_RESPONSE_MESSAGE)
-//    )
-//    public ResponseEntity<ApiResult<List<BookmarkedPostListResponse>>> getBookmarkedPostList(@Parameter(description = "사용자 인증을 위한 Bearer 토큰")
-//                                                                                             @RequestHeader(name = "Authorization") String bearerToken) {
-//
-//        AccessTokenInfo memberInfo = jwtTokenProvider.getMemberInfoByBearerToken(bearerToken);
-//        List<BookmarkedPostListResponse> bookmarkedPostList = bookmarkService.getBookmarkedPostList(memberInfo.memberNo());
-//
-//        return ResponseEntity.ok().body(ApiResult.success(GET_RESPONSE_MESSAGE, bookmarkedPostList));
-//    }
-
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(
             summary = "북마크 생성",
