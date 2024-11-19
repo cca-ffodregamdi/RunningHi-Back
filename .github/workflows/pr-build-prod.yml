@@ -64,10 +64,10 @@ jobs:
       - name: Add permission to make gradlew executable
         run: chmod +x gradlew
 
-#      - name: Test with Gradle
-#        run: ./gradlew --info test
-#        env:
-#          SPRING_PROFILES_ACTIVE: prod
+      - name: Test with Gradle
+        run: ./gradlew --info test
+        env:
+          SPRING_PROFILES_ACTIVE: prod
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
