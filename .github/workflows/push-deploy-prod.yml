@@ -5,6 +5,7 @@ on:
     branches: [ "prod" ]
 
 permissions:
+  id-token: write # OIDC 인증에 필요
   contents: read
 
 jobs:
@@ -14,32 +15,31 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # 서버에 통신하기 위한 SSH를 설정합니다.
-      - name: Setup SSH
-        uses: appleboy/ssh-action@v0.1.8
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SERVER_SSH_PORT }}
-          script: |
-            # 배포 서버에 host 키 확인
-            sudo mkdir -p ~/.ssh
-            sudo ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
-            
-            # 배포 서버에서 DockerHub Login
-            echo ${{ secrets.DOCKERHUB_TOKEN }} | sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-            
-            # Pull Docker Image
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/runninghi:latest
-            
-            # Stop and Remove existing contrainer
-            sudo docker stop runninghi || true && sudo docker rm runninghi || true
-            
-            # 포트 사용중일 시에 종료 처리
-            sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true
-            
-            # Run new container
-            sudo docker run -d --name runninghi --network myapp_network --ip ${{ secrets.DOCKER_IP }} -v /home/runninghi/prod/logs:/app/logs ${{ secrets.DOCKERHUB_USERNAME }}/runninghi:latest
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
+          role-session-name: GitHubDeployment
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Create Dockerrun.aws.json
+        run: |
+          echo "${{ secrets.PROD_DOCKER_RUN_AWS_JSON }}" > Dockerrun.aws.json
+
+      - name: Deploy To Beanstalk
+        run: |
+          # 새 애플리케이션 버전 생성
+          aws elasticbeanstalk create-application-version \
+            --application-name ${{ secrets.EB_APPLICATION_NAME }} \
+            --version-label "ver-${{ github.sha }}" \
+
+          # 기존 환경 업데이트
+          aws elasticbeanstalk update-environment \
+            --environment-name ${{ secrets.EB_ENVIRONMENT_NAME }} \
+            --version-label "ver-${{ github.sha }}"
+          
+          # 배포 상태 확인
+          aws elasticbeanstalk wait environment-updated \
+            --environment-name ${{ secrets.EB_ENVIRONMENT_NAME }}
