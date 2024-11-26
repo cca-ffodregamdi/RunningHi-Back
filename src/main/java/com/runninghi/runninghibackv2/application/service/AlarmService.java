@@ -77,6 +77,7 @@ public class AlarmService {
                 .build();
 
         alarmRepository.save(alarm);
+        log.info("알림 내역 DB 저장 완료.");
 
         if (member.isAlarmConsent()) { // 알림 동의했을 시 발송, 아닐 시 stop
             try {
@@ -91,6 +92,8 @@ public class AlarmService {
     }
 
     private void sendPushAlarm(CreateAlarmRequest request) throws FirebaseMessagingException {
+
+        log.info("push Alarm을 시도합니다.");
 
         Notification notification = Notification.builder()
                 .setTitle(AlarmConstants.title)
