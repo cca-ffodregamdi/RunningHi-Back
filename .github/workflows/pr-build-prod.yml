@@ -1,4 +1,4 @@
-name: PR Build and Test On Prod
+name: PR Build and Test On Prod For EB
 
 on:
   pull_request:
@@ -9,7 +9,6 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     environment: prod
 
@@ -55,7 +54,7 @@ jobs:
           mv ./runninghi-firebase-adminsdk.json ./src/main/resources/firebase/
 
       ## apple 설정
-      - name: apple setting
+      - name: Setup Apple
         run: |
           mkdir -p ./src/main/resources/apple
           touch ./src/main/resources/apple/Apple_AuthKey.p8
