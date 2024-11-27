@@ -47,3 +47,4 @@ src/main/resources/firebase/runninghi-firebase-adminsdk.json
 
 ## QClass
 generated/
+/src/main/resources/aws/Dockerrun.aws.json
