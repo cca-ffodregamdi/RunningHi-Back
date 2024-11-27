@@ -56,7 +56,6 @@ public class Alarm {
     @CollectionTable(name = "tbl_alarm_additional_data", joinColumns = @JoinColumn(name = "alarm_no"))
     @MapKeyColumn(name = "data_key")
     @Column(name = "data_value")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private Map<String, String> additionalData;
 
     @Column(name = "is_read", nullable = false)
