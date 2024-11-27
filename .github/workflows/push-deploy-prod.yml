@@ -43,3 +43,5 @@ jobs:
           # 배포 상태 확인
           aws elasticbeanstalk wait environment-updated \
             --environment-name ${{ secrets.EB_ENVIRONMENT_NAME }}
+          aws elasticbeanstalk describe-environments \
+            --environment-names ${{ secrets.EB_ENVIRONMENT_NAME }}
