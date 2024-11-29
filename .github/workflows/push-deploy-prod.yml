@@ -28,6 +28,17 @@ jobs:
         run: |
           echo "${{ secrets.PROD_DOCKER_RUN_AWS_JSON }}" > Dockerrun.aws.json
 
+      - name: Check Elastic Beanstalk Status
+        run: |
+          status=$(aws elasticbeanstalk describe-environments \
+            --environment-names ${{ secrets.EB_ENVIRONMENT_NAME }} \
+            --query "Environments[0].Status" --output text)
+          
+          if [ "$status" != "Ready" ]; then
+            echo "Environment is not ready. Current status: $status"
+            exit 1
+          fi      
+
       - name: Deploy To Beanstalk
         run: |
           # 새 애플리케이션 버전 생성
@@ -45,3 +56,4 @@ jobs:
             --environment-name ${{ secrets.EB_ENVIRONMENT_NAME }}
           aws elasticbeanstalk describe-environments \
             --environment-names ${{ secrets.EB_ENVIRONMENT_NAME }}
+          
