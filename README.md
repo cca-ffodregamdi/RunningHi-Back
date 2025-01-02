@@ -2,20 +2,22 @@
 
 # 👟러닝하이 백엔드👟
 
-#### 🔽 바로 다운받아 사용해보세요! 🔽
-<td align="center"><a href="https://apps.apple.com/kr/app/%EB%9F%AC%EB%8B%9D%ED%95%98%EC%9D%B4/id6504293843"><img src="https://github.com/user-attachments/assets/faa6b69c-aeb2-4c02-ba58-761eba6c03ae" width="550px;" alt="">
+![image](https://github.com/cca-ffodregamdi/.github/assets/61495627/665d47b9-d19d-4234-9a6d-6e876d6312f3)
 
-##### 🍎iOS RELEASE 24.09.08🍎
+#### 🔽 바로 다운받아 사용해보세요! 🔽
+<td align="center"><a href="https://apps.apple.com/kr/app/%EB%9F%AC%EB%8B%9D%ED%95%98%EC%9D%B4/id6504293843"><img src="https://github.com/user-attachments/assets/faa6b69c-aeb2-4c02-ba58-761eba6c03ae" width="250px;" alt="">
+
 
 </div>
 
 <br/><br/>
 
 
+
 ## 👟 1. TECH STACK
 
-![fianl](https://github.com/user-attachments/assets/d9bc2737-dad9-4124-b029-9717f229136e)
-
+<!-- ![fianl](https://github.com/user-attachments/assets/d9bc2737-dad9-4124-b029-9717f229136e) -->
+![Group 29](https://github.com/user-attachments/assets/31b16a0a-8605-4c6a-8c23-c332ae724775)
 
 
 <br/><br/>
