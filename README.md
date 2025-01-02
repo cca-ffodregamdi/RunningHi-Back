@@ -59,6 +59,12 @@
     <td align="center"><a href="https://github.com/silverpoodle"><b>@silverpoodle</b></td>
     <td align="center"><a href="https://github.com/hodin030"><b>@hodin030</b></td>
   </tr>
+   <tr>
+    <td align="center">알림, 좋아요, 댓글</td>
+    <td align="center">회원, 가입/로그인</td>
+    <td align="center">러닝코스, 게시글</td>
+    <td align="center">챌린지, </td>
+  </tr>
 </table>
 
 
@@ -67,7 +73,7 @@
 <br/><br/>
 
 
-## 👟 4. COLABORATION
+## 👟 4. COLLABORATION
 
 #### 1️⃣ [기획과 이벤트 스토밍](https://github.com/cca-ffodregamdi/running-hi-back-v2/wiki/%EA%B8%B0%ED%9A%8D%EA%B3%BC-%EC%9D%B4%EB%B2%A4%ED%8A%B8-%EC%8A%A4%ED%86%A0%EB%B0%8D)
 
