@@ -70,7 +70,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Test with Gradle
-        run: ./gradlew --info test
+        run: ./gradlew test --info --stacktrace
         env:
           SPRING_PROFILES_ACTIVE: test
 
