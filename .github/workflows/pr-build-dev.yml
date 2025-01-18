@@ -40,6 +40,7 @@ jobs:
         run: |
           mkdir -p ./src/main/resources
           echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
+          echo "${{ secrets.LOCAL_APPLICATION_YML }}" > ./src/main/resources/application-local.yml
           echo "${{ secrets.DEV_APPLICATION_YML }}" > ./src/main/resources/application-dev.yml
         shell: bash
 
@@ -76,7 +77,7 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2.4.2
         with:
-          arguments: build -Dspring.profiles.active=dev
+          arguments: build -Dspring.profiles.active=local
 
       ## docker upload image
       - name: docker image build
