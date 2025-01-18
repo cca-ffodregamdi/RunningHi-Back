@@ -25,25 +25,25 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
-          # 배포 서버에 host 키 확인
+            # 배포 서버에 host 키 확인
             sudo mkdir -p ~/.ssh && chmod 700 ~/.ssh
             sudo ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
             
-          # 배포 서버에서 DockerHub Login
+            # 배포 서버에서 DockerHub Login
             echo ${{ secrets.DOCKERHUB_TOKEN }} | sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             
-          # Pull Docker Image
+            # Pull Docker Image
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
             
-          # Stop and Remove existing container
+            # Stop and Remove existing container
             sudo docker stop runninghi-prod || true && sudo docker rm runninghi-prod || true
             
-          # 포트 사용 중일 시에 종료 처리
+            # 포트 사용 중일 시에 종료 처리
             sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true
             
-          # Run new container with log volume mapped to EC2 host directory
+            # Run new container with log volume mapped to EC2 host directory
             sudo docker run -d \
             --name runninghi-prod \
-            --network host \ # host 네트워크 사용
+            --network host \
             -v /home/ec2-user/logs:/app/logs \
             ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
