@@ -42,8 +42,10 @@ jobs:
             sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true
             
           # Run new container with log volume mapped to EC2 host directory
+        - name: Deploy Docker container
+          run: |
             sudo docker run -d \
             --name runninghi-prod \
-            --network host \ # host 네트워크 사용
+            --network host \
             -v /home/ec2-user/logs:/app/logs \
             ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
