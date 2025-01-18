@@ -43,7 +43,7 @@ jobs:
             
           # Run new container with log volume mapped to EC2 host directory
             sudo docker run -d \
-            --name runninghi-dev \
+            --name runninghi-prod \
             --network host \ # host 네트워크 사용
             -v /home/ec2-user/logs:/app/logs \
-            ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-dev:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
