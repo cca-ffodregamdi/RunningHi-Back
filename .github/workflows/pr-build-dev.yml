@@ -72,12 +72,12 @@ jobs:
       - name: Test with Gradle
         run: ./gradlew --info test
         env:
-          SPRING_PROFILES_ACTIVE: dev
+          SPRING_PROFILES_ACTIVE: local
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2.4.2
         with:
-          arguments: build -Dspring.profiles.active=local
+          arguments: build -Dspring.profiles.active=dev
 
       ## docker upload image
       - name: docker image build
