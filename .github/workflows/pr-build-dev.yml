@@ -40,7 +40,7 @@ jobs:
         run: |
           mkdir -p ./src/main/resources
           echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.yml
-          echo "${{ secrets.LOCAL_APPLICATION_YML }}" > ./src/main/resources/application-local.yml
+          echo "${{ secrets.TEST_APPLICATION_YML }}" > ./src/main/resources/application-local.yml
           echo "${{ secrets.DEV_APPLICATION_YML }}" > ./src/main/resources/application-dev.yml
         shell: bash
 
@@ -72,7 +72,7 @@ jobs:
       - name: Test with Gradle
         run: ./gradlew --info test
         env:
-          SPRING_PROFILES_ACTIVE: local
+          SPRING_PROFILES_ACTIVE: test
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2.4.2

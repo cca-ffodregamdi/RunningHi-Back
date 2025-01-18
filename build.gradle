@@ -87,6 +87,9 @@ dependencies {
 
     implementation 'com.drewnoakes:metadata-extractor:2.18.0'
 
+    // dev 환경 테스트용 인메모리 DB
+    testImplementation 'com.h2database:h2'
+
 }
 
 tasks.named('test') {
