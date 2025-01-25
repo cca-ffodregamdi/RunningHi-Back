@@ -15,7 +15,6 @@ import java.util.List;
 @ConfigurationProperties(prefix = "runninghi.version")
 public class VersionCheckerConfig {
 
-    private String current;
     private List<String> exceptions;
 
 }

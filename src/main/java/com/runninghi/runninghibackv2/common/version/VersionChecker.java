@@ -23,23 +23,8 @@ public class VersionChecker {
 
         if (config.getExceptions().contains(version)) {
             return ResponseEntity.ok(ApiResult.success("테스터가 아닙니다.", Map.of("isReviewer", false)));
-        }
-
-        String[] versionParts = version.split("\\.");
-        String[] currentVersionParts = config.getCurrent().split("\\.");
-
-        StringBuilder targetVersion = new StringBuilder();
-        StringBuilder targetCurrentVersion = new StringBuilder();
-        int arrayLength = currentVersionParts.length;
-        for (int i = 0; i < arrayLength; i++) {
-            targetVersion.append(versionParts[i]);
-            targetCurrentVersion.append(currentVersionParts[i]);
-        }
-
-        if (Integer.parseInt(targetVersion.toString()) > Integer.parseInt(targetCurrentVersion.toString())) {
-            return ResponseEntity.ok(ApiResult.success("테스터 확인 성공", Map.of("isReviewer", true)));
         } else {
-            return ResponseEntity.ok(ApiResult.success("테스터가 아닙니다.", Map.of("isReviewer", false)));
+            return ResponseEntity.ok(ApiResult.success("테스터 확인 성공", Map.of("isReviewer", true)));
         }
     }
 
