@@ -3,14 +3,11 @@ package com.runninghi.runninghibackv2.common.schedule;
 import com.runninghi.runninghibackv2.domain.entity.*;
 import com.runninghi.runninghibackv2.domain.entity.vo.BookmarkId;
 import com.runninghi.runninghibackv2.domain.entity.vo.GpsDataVO;
-import com.runninghi.runninghibackv2.domain.entity.vo.PostKeywordId;
 import com.runninghi.runninghibackv2.domain.entity.vo.RunDataVO;
 import com.runninghi.runninghibackv2.domain.enumtype.*;
 import com.runninghi.runninghibackv2.domain.repository.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -23,7 +20,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -48,9 +44,6 @@ class MemberCleanupBatchTests {
     private FeedbackRepository feedbackRepository;
 
     @Autowired
-    private PostKeywordRepository postKeywordRepository;
-
-    @Autowired
     private PostReportRepository postReportRepository;
 
     @Autowired
@@ -61,9 +54,6 @@ class MemberCleanupBatchTests {
 
     @Autowired
     private ReplyRepository replyRepository;
-
-    @Autowired
-    private KeywordRepository keywordRepository;
 
     private LocalDateTime dateTime;
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
@@ -76,12 +66,10 @@ class MemberCleanupBatchTests {
         alarmRepository.deleteAllInBatch();
         bookmarkRepository.deleteAllInBatch();
         feedbackRepository.deleteAllInBatch();
-        postKeywordRepository.deleteAllInBatch();
         postReportRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
         replyReportRepository.deleteAllInBatch();
         replyRepository.deleteAllInBatch();
-        keywordRepository.deleteAllInBatch();
     }
 
     @BeforeEach
@@ -304,43 +292,6 @@ class MemberCleanupBatchTests {
         postReports.add(postReport3);
 
         postReportRepository.saveAllAndFlush(postReports);
-
-
-        List<Keyword> keywords = new ArrayList<>();
-        Keyword keyword1 = new Keyword("Hello");
-        keywords.add(keyword1);
-        Keyword keyword2 = new Keyword("World");
-        keywords.add(keyword2);
-        Keyword keyword3 = new Keyword("Nice");
-        keywords.add(keyword3);
-
-        keywordRepository.saveAllAndFlush(keywords);
-
-
-        List<PostKeyword> postKeywords = new ArrayList<>();
-
-        PostKeyword postKeyword1 = PostKeyword.builder()
-                .postKeywordId(PostKeywordId.builder()
-                        .keywordNo(keyword1.getKeywordNo())
-                        .postNo(post1.getPostNo())
-                        .build())
-                .keyword(keyword1)
-                .post(post1)
-                .build();
-        postKeywords.add(postKeyword1);
-
-        PostKeyword postKeyword2 = PostKeyword.builder()
-                .postKeywordId(PostKeywordId.builder()
-                        .keywordNo(keyword2.getKeywordNo())
-                        .postNo(post2.getPostNo())
-                        .build())
-                .keyword(keyword2)
-                .post(post2)
-                .build();
-        postKeywords.add(postKeyword2);
-
-        postKeywordRepository.saveAllAndFlush(postKeywords);
-
 
         List<Feedback> feedbacks = new ArrayList<>();
 

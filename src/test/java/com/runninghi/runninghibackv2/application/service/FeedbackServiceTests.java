@@ -10,7 +10,6 @@ import com.runninghi.runninghibackv2.domain.entity.Member;
 import com.runninghi.runninghibackv2.domain.enumtype.FeedbackCategory;
 import com.runninghi.runninghibackv2.domain.repository.FeedbackRepository;
 import com.runninghi.runninghibackv2.domain.repository.MemberRepository;
-import com.runninghi.runninghibackv2.domain.repository.PostKeywordRepository;
 import com.runninghi.runninghibackv2.domain.repository.PostRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.coyote.BadRequestException;
@@ -42,9 +41,6 @@ class FeedbackServiceTests {
     private FeedbackRepository feedbackRepository;
 
     @Autowired
-    private PostKeywordRepository postKeywordRepository;
-
-    @Autowired
     private PostRepository postRepository;
 
     private Member testMember1;
@@ -55,7 +51,6 @@ class FeedbackServiceTests {
     @BeforeEach
     @AfterEach
     void clear() {
-        postKeywordRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
         feedbackRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();

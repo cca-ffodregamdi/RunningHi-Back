@@ -21,7 +21,6 @@ public class MemberCleanupBatch {
     private final AlarmRepository alarmRepository;
     private final BookmarkRepository bookmarkRepository;
     private final FeedbackRepository feedbackRepository;
-    private final PostKeywordRepository postKeywordRepository;
     private final PostReportRepository postReportRepository;
     private final PostRepository postRepository;
     private final ReplyReportRepository replyReportRepository;
@@ -87,7 +86,6 @@ public class MemberCleanupBatch {
                     for (Reply reply : replies) { replyReportRepository.deleteAllByReportedReply(reply); }
 
                     // 키워드, 북마크, 댓글 등을 일괄 삭제
-                    postKeywordRepository.deleteAllByPost(post);
                     bookmarkRepository.deleteAllByPost(post);
                     replyRepository.deleteAllByPost(post);
                     replyReportRepository.deleteAllByReportedReply_Post(post);
