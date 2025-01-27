@@ -189,7 +189,7 @@ public class AppleOauthService {
         response.put("accessToken", accessToken);
         response.put("refreshToken", refreshToken);
 
-        if (isNewMember)
+//        if (isNewMember)
             response.put("memberNo", member.getMemberNo().toString());
 
         log.info("토큰 생성 완료. 응답: {}", response);
