@@ -3,6 +3,7 @@ package com.runninghi.runninghibackv2.MotherObject;
 
 import com.runninghi.runninghibackv2.domain.entity.Member;
 import com.runninghi.runninghibackv2.domain.entity.Post;
+import com.runninghi.runninghibackv2.domain.entity.Record;
 import com.runninghi.runninghibackv2.domain.entity.vo.GpsDataVO;
 import com.runninghi.runninghibackv2.domain.enumtype.Difficulty;
 import com.runninghi.runninghibackv2.domain.enumtype.Role;
@@ -18,13 +19,16 @@ public final class PostMother {
 
     private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     static Point point = geometryFactory.createPoint(new Coordinate(126.978,37.566));
+    private static final GpsDataVO gpsDataVO = new GpsDataVO("도쿄", point, LocalDateTime.now(), 100f, 42000, 200, 300, Arrays.asList(100, 200, 300), Arrays.asList(50, 100, 150), Difficulty.EASY);
+
+
     public static Post createUserPost(Member member) {
         return Post.builder()
                 .member(member)
                 .postContent("post content for test")
                 .role(Role.USER)
                 .status(true)
-                .gpsDataVO(new GpsDataVO("도쿄", point, LocalDateTime.now(), 100f, 42000, 200, 300, Arrays.asList(100, 200, 300), Arrays.asList(50, 100, 150), Difficulty.EASY))
+                .gpsDataVO(gpsDataVO)
                 .build();
     }
 
@@ -33,7 +37,7 @@ public final class PostMother {
                 .member(member)
                 .role(Role.USER)
                 .status(false)
-                .gpsDataVO(new GpsDataVO("도쿄", point, LocalDateTime.now(), 100f, 42000, 200, 300, Arrays.asList(100, 200, 300), Arrays.asList(50, 100, 150), Difficulty.EASY))
+                .gpsDataVO(gpsDataVO)
                 .build();
     }
 
@@ -46,4 +50,5 @@ public final class PostMother {
                 .locationName("SEOUL")
                 .build();
     }
+
 }
