@@ -2,18 +2,17 @@ package com.runninghi.runninghibackv2.application.service;
 
 import com.runninghi.runninghibackv2.MotherObject.MemberMother;
 import com.runninghi.runninghibackv2.MotherObject.PostMother;
+import com.runninghi.runninghibackv2.MotherObject.RecordMother;
 import com.runninghi.runninghibackv2.application.dto.alarm.request.CreateAlarmRequest;
 import com.runninghi.runninghibackv2.application.dto.post.request.CreatePostRequest;
 import com.runninghi.runninghibackv2.application.dto.post.request.UpdatePostRequest;
 import com.runninghi.runninghibackv2.application.dto.post.response.*;
 import com.runninghi.runninghibackv2.domain.entity.*;
+import com.runninghi.runninghibackv2.domain.entity.Record;
 import com.runninghi.runninghibackv2.domain.entity.vo.BookmarkId;
 import com.runninghi.runninghibackv2.domain.entity.vo.GpsDataVO;
 import com.runninghi.runninghibackv2.domain.entity.vo.LikeId;
-import com.runninghi.runninghibackv2.domain.repository.BookmarkRepository;
-import com.runninghi.runninghibackv2.domain.repository.LikeRepository;
-import com.runninghi.runninghibackv2.domain.repository.MemberRepository;
-import com.runninghi.runninghibackv2.domain.repository.PostRepository;
+import com.runninghi.runninghibackv2.domain.repository.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -32,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,9 +53,12 @@ class PostServiceTests {
     private LikeRepository likeRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private RecordRepository recordRepository;
 
     private Member member1;
     private Member member2;
+    private Post deletePost;
 
     private String sampleData = """
             {"runInfo":{"runStartDate":"2023-08-05T06:36:15","location":"제주","distance":1.5,"time":3000,"kcal":100,"meanPace":1500,"difficulty":"EASY"},"sectionData":{"pace":[1000,2000],"kcal":[40,60]},"gpsData":[{"lon":126.655,"lat":33.4518,"time":"2023-08-05T06:36:15"},{"lon":126.656,"lat":33.4517,"time":"2023-08-05T06:36:17"},{"lon":126.656,"lat":33.4516,"time":"2023-08-05T06:36:21"}]}
@@ -68,12 +71,14 @@ class PostServiceTests {
     void clear() {
         memberRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
+        recordRepository.deleteAllInBatch();
     }
 
     @BeforeEach
     void setup() {
         member1 = MemberMother.createUserMember("member1");
         member2 = MemberMother.createUserMember("member2");
+
         List<Member> memberList =  Arrays.asList(member1, member2);
         memberRepository.saveAllAndFlush(memberList);
 
@@ -83,9 +88,9 @@ class PostServiceTests {
             postList.add(post);
         }
 
-        Post post = PostMother.createUserPostFalse(member1);
-        postRepository.saveAndFlush(post);
-        postList.add(post);
+        deletePost = PostMother.createUserPostFalse(member1);
+        postRepository.saveAndFlush(deletePost);
+        postList.add(deletePost);
 
         Like like = Like.builder()
                 .likeId(new LikeId(member2.getMemberNo(), postList.get(0).getPostNo()))
@@ -100,6 +105,9 @@ class PostServiceTests {
                 .member(member2)
                 .build();
         bookmarkRepository.saveAndFlush(bookmark);
+
+        Record record = RecordMother.createUserRecord(deletePost, LocalDate.now());
+        recordRepository.saveAndFlush(record);
     }
 
     @Test
@@ -264,7 +272,10 @@ class PostServiceTests {
     @Test
     @DisplayName("작성한 게시글 삭제 : success")
     void testDeletePost() {
-        //Record 함께 테스트
+        long before = postRepository.count();
+        postService.deletePost(member1.getMemberNo(), deletePost.getPostNo());
+        long after = postRepository.count();
+        assertEquals(after, before - 1);
     }
 
     @Test

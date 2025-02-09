@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest
-class ImageCheckerTest {
+class ImageCheckerTests {
 
     @Autowired
     private ImageChecker imageChecker;

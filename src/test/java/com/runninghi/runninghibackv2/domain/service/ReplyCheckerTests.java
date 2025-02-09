@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 
 @SpringBootTest
-class ReplyCheckerTest {
+class ReplyCheckerTests {
 
     @Autowired
     private ReplyChecker replyChecker;

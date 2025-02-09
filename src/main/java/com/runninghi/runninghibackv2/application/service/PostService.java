@@ -348,20 +348,24 @@ public class PostService {
     @Transactional
     public DeletePostResponse deletePost(Long memberNo, Long postNo) {
         log.info("게시물 삭제 시작. 회원번호: {}, 게시물 번호: {}", memberNo, postNo);
-        Post post = findPostByNo(postNo);
 
+        Post post = findPostByNo(postNo);
         postChecker.isWriter(memberNo, post.getMember().getMemberNo());
 
         try {
             postRepository.deleteById(postNo);
+            log.info("게시물 삭제 완료. 게시물 번호: {}", postNo);
+
             recordService.deleteRecord(postNo);
+            log.info("연관 레코드 삭제 완료. 게시물 번호: {}", postNo);
         } catch (Exception e) {
-            log.error("게시글 삭제 중 오류 발생. 회원번호: {}, 게시글 번호: {}", memberNo, postNo, e);
+            log.error("게시글 삭제 중 오류 발생. 회원번호: {}, 게시물 번호: {}", memberNo, postNo, e);
             throw e;
         }
 
         return DeletePostResponse.from(postNo);
     }
+
 
     @Transactional
     public void addReportedCount(Long postNo) {
