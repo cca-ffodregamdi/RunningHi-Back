@@ -40,8 +40,13 @@ jobs:
               NEW_PORT=8080
             fi
             
+            # 타임스탬프를 이용한 컨테이너 이름 생성
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            CONTAINER_NAME="runninghi-prod-${NEW_PORT}-${TIMESTAMP}"
+            
             echo "Current running port: $CURRENT_PORT"
             echo "New port will be: $NEW_PORT"
+            echo "New container name: $CONTAINER_NAME"
             
             # Pull latest image
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
@@ -85,7 +90,10 @@ jobs:
 
              # 이전 컨테이너 정리
              if [ ! -z "$CURRENT_PORT" ]; then
-               echo "Remove old container on port $CURRENT_PORT"
-               sudo docker stop runninghi-prod-$CURRENT_PORT || true
-               sudo docker rm runninghi-prod-$CURRENT_PORT || true
-             fi
+               echo "Cleaning up old containers on port $CURRENT_PORT"
+               OLD_CONTAINERS=$(sudo docker ps -a | grep "runninghi-prod-${CURRENT_PORT}" | awk '{print $1}')
+               for container in $OLD_CONTAINERS; do
+                 sudo docker stop $container || true
+                 sudo docker rm $container || true
+               done
+            fi
