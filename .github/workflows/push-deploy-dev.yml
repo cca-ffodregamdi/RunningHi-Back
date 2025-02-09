@@ -16,8 +16,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # 서버에 통신하기 위한 SSH를 설정합니다.
-      - name: Setup SSH
+      # SSH 설정 및 Blue-Green 배포
+      - name: Setup SSH & Deploy
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -25,25 +25,48 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
           script: |
-            # 배포 서버에 host 키 확인
-            sudo mkdir -p ~/.ssh && chmod 700 ~/.ssh
-            sudo ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
-            
-            # 배포 서버에서 DockerHub Login
+            # DockerHub 로그인
             echo ${{ secrets.DOCKERHUB_TOKEN }} | sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             
-            # Pull Docker Image
+            # 현재 실행 중인 컨테이너 확인
+            ACTIVE_CONTAINER=$(sudo docker ps --format '{{.Names}}' | grep 'runninghi-prod' || true)
+
+            # 다음 배포할 컨테이너 결정
+            if [[ "$ACTIVE_CONTAINER" == "runninghi-prod-green" ]]; then
+              NEW_CONTAINER="runninghi-prod-blue"
+              OLD_CONTAINER="runninghi-prod-green"
+            else
+              NEW_CONTAINER="runninghi-prod-green"
+              OLD_CONTAINER="runninghi-prod-blue"
+            fi
+
+            echo "Deploying new container: $NEW_CONTAINER (Replacing $OLD_CONTAINER)"
+
+            # 새로운 컨테이너 실행 (타 포트에서 우선 실행)
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
-            
-            # Stop and Remove existing container
-            sudo docker stop runninghi-prod || true && sudo docker rm runninghi-prod || true
-            
-            # 포트 사용 중일 시에 종료 처리
-            sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true
-            
-            # Run new container with log volume mapped to EC2 host directory
+            sudo docker stop $NEW_CONTAINER || true && sudo docker rm $NEW_CONTAINER || true
             sudo docker run -d \
-            --name runninghi-prod \
-            --network host \
-            -v /home/ec2-user/logs:/app/logs \
-            ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
+              --name $NEW_CONTAINER \
+              --network host \
+              -v /home/ec2-user/logs:/app/logs \
+              -p 8081:8081 \
+              ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
+
+            # Health Check (새 컨테이너 정상 실행 확인)
+            sleep 10
+            if ! curl -sSf http://localhost:8081/actuator/health | grep -q '"status":"UP"'; then
+              echo "Health check failed. Deployment aborted."
+              exit 1
+            fi
+
+            # Nginx upstream 변경 (트래픽 전환)
+            sudo sed -i "s/set \$backend $OLD_CONTAINER;/set \$backend $NEW_CONTAINER;/g" /etc/nginx/conf.d/runninghi.conf
+            sudo systemctl reload nginx
+            echo "Switched to $NEW_CONTAINER"
+
+            # 기존 컨테이너 정리
+            if [[ ! -z "$OLD_CONTAINER" ]]; then
+              echo "Stopping old container: $OLD_CONTAINER"
+              sudo docker stop $OLD_CONTAINER
+              sudo docker rm $OLD_CONTAINER
+            fi
