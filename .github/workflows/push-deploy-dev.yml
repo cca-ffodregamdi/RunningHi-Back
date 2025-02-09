@@ -40,6 +40,12 @@ jobs:
               NEW_PORT=8080
             fi
             
+            echo "Current running port: $CURRENT_PORT"
+            echo "New port will be: $NEW_PORT"
+            
+            # Pull latest image
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
+            
             # 새로운 컨테이너 실행
             sudo docker run -d \
             --name runninghi-prod-$NEW_PORT \
@@ -64,6 +70,8 @@ jobs:
       
 
              # 이전 컨테이너 정리
-             OLD_PORT=$([ "$NEW_PORT" == "8080" ] && echo "8081" || echo "8080")
-             sudo docker stop runninghi-prod-$OLD_PORT || true
-             sudo docker rm runninghi-prod-$OLD_PORT || true
+             if [ ! -z "$CURRENT_PORT" ]; then
+               echo "Remove old container on port $CURRENT_PORT"
+               sudo docker stop runninghi-prod-$CURRENT_PORT || true
+               sudo docker rm runninghi-prod-$CURRENT_PORT || true
+             fi
