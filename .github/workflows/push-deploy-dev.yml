@@ -61,24 +61,10 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
             
              # 새로운 컨테이너 상태 확인 (30초 대기 후 검사)
-             TIMEOUT=300
-             INTERVAL=10
-             ELAPSED=0
-             while [ $ELAPSED -lt $TIMEOUT ]; do
-               if curl -s http://localhost:$NEW_PORT | grep -q 'UP'; then
-                 echo "New container HEALTHY"
-                 break
-               fi
-               echo "Waiting... ($ELAPSED/$TIMEOUT seconds)"
-               sleep $INTERVAL
-               ELAPSED=$((ELAPSED + INTERVAL))
-             done
-
-             if [ $ELAPSED -ge $TIMEOUT ]; then
-               echo "New container failed to become healthy"
+             sleep 30
+             if ! curl -s http://localhost:$NEW_PORT | grep -q 'UP'; then
+               echo "New container failed to start!"
                sudo docker logs runninghi-prod-$NEW_PORT
-               sudo docker stop runninghi-prod-$NEW_PORT
-               sudo docker rm runninghi-prod-$NEW_PORT
                exit 1
              fi
             
