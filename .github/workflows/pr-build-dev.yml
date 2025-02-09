@@ -34,6 +34,15 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      # Gradle 빌드에 필요한 데이터를 캐싱하여 빌드 속도를 향상
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-
 
       ## resources 디렉토리 확인 및 생성, yml 설정
       - name: Setup application.yml
