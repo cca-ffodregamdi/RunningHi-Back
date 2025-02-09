@@ -32,8 +32,8 @@ jobs:
             # 배포 서버에서 DockerHub Login
             echo ${{ secrets.DOCKERHUB_TOKEN }} | sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             
-            # 현재 실행 중인 컨테이너 확인
-            CURRENT_PORT=$(sudo docker ps --format '{{.Ports}}' | grep -oE '0.0.0.0:([0-9]+)->8080' | cut -d: -f2)
+            # 컨테이너 이름에서 포트 번호를 추출
+            CURRENT_PORT=$(sudo docker ps --format '{{.Names}}' | grep "runninghi-prod-808[0-1]" | grep -oE '808[0-1]' || echo "8081")
             if [ "$CURRENT_PORT" == "8080" ]; then
               NEW_PORT=8081
             else
@@ -52,6 +52,7 @@ jobs:
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
             
             # 새로운 컨테이너 실행
+            echo 
             sudo docker run -d \
             --name $CONTAINER_NAME \
             --network host \
