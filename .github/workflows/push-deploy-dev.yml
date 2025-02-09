@@ -65,7 +65,7 @@ jobs:
              INTERVAL=10
              ELAPSED=0
              while [ $ELAPSED -lt $TIMEOUT ]; do
-               if curl -s http://localhost:$NEW_PORT/actuator/health | grep -q 'UP'; then
+               if curl -s http://localhost:$NEW_PORT | grep -q 'UP'; then
                  echo "New container HEALTHY"
                  break
                fi
