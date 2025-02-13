@@ -32,18 +32,55 @@ jobs:
             # 배포 서버에서 DockerHub Login
             echo ${{ secrets.DOCKERHUB_TOKEN }} | sudo docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
             
-            # Pull Docker Image
+            # 컨테이너 이름에서 포트 번호를 추출
+            CURRENT_PORT=$(sudo docker ps --format '{{.Names}}' | grep "runninghi-prod-808[0-1]" | grep -oE '808[0-1]' || echo "8081")
+            if [ "$CURRENT_PORT" == "8080" ]; then
+              NEW_PORT=8081
+            else
+              NEW_PORT=8080
+            fi
+            
+            # 타임스탬프를 이용한 컨테이너 이름 생성
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            CONTAINER_NAME="runninghi-prod-${NEW_PORT}-${TIMESTAMP}"
+            
+            echo "Current running port: $CURRENT_PORT"
+            echo "New port will be: $NEW_PORT"
+            echo "New container name: $CONTAINER_NAME"
+            
+            # Pull latest image
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
             
-            # Stop and Remove existing container
-            sudo docker stop runninghi-prod || true && sudo docker rm runninghi-prod || true
-            
-            # 포트 사용 중일 시에 종료 처리
-            sudo fuser -k ${{ secrets.SERVER_PORT }}/tcp || true
-            
-            # Run new container with log volume mapped to EC2 host directory
+            # 새로운 컨테이너 실행
+            echo 
             sudo docker run -d \
-            --name runninghi-prod \
+            --name $CONTAINER_NAME \
             --network host \
             -v /home/ec2-user/logs:/app/logs \
+            -e SPRING_PROFILES_ACTIVE=dev \
+            -e SERVER_PORT=$NEW_PORT \
             ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
+            
+             # 새로운 컨테이너 상태 확인 (30초 대기 후 검사)
+             sleep 30
+             # if ! curl -s http://localhost:$NEW_PORT | grep -q 'UP'; then
+             #  echo "New container failed to start!"
+             #  sudo docker logs runninghi-prod-$NEW_PORT
+             #  exit 1
+             # fi
+            
+            
+             # nginx 설정 변경 (새로운 포트로 트래픽 전환)
+             sudo sed -i "s/proxy_pass http:\/\/localhost:[0-9]\+/proxy_pass http:\/\/localhost:$NEW_PORT/" /etc/nginx/nginx.conf
+             sudo systemctl restart nginx
+      
+
+             # 이전 컨테이너 정리
+             if [ ! -z "$CURRENT_PORT" ]; then
+               echo "Cleaning up old containers on port $CURRENT_PORT"
+               OLD_CONTAINERS=$(sudo docker ps -a | grep "runninghi-prod-${CURRENT_PORT}" | awk '{print $1}')
+               for container in $OLD_CONTAINERS; do
+                 sudo docker stop $container || true
+                 sudo docker rm $container || true
+               done
+            fi
