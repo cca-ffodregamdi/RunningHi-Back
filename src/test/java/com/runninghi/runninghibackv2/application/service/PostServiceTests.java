@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -151,6 +153,20 @@ class PostServiceTests {
 
         assertTrue(postList1.get(0).likeCnt() > postList1.get(1).likeCnt());
         assertTrue(postList1.get(2).createDate().isAfter(postList1.get(3).createDate()));
+    }
+
+    @Test
+    @DisplayName("오류 시 디폴트 조회 : success")
+    void testGetPostScrollByDefault() {
+        Pageable pageable1 = PageRequest.of(0 , 10);
+        List<GetAllPostsResponse> postList1 = postService.getPostScroll(member1.getMemberNo(), pageable1, "asdf").getContent();
+        assertEquals(10, postList1.size());
+
+        Pageable pageable2 = PageRequest.of(1 , 10);
+        List<GetAllPostsResponse> postList2 = postService.getPostScroll(member1.getMemberNo(), pageable2, "latest").getContent();
+        assertEquals(5, postList2.size());
+
+        assertTrue(postList1.get(0).createDate().isAfter(postList1.get(1).createDate()));
     }
 
     @Test
@@ -284,5 +300,41 @@ class PostServiceTests {
         assertThrowsExactly(AccessDeniedException.class, () -> {
             postService.deletePost(member2.getMemberNo(), postList.get(0).getPostNo());
         });
+    }
+
+    @Test
+    void testGetPostByPostNo() {
+        Post post = postList.get(0);
+        GetAllPostsResponse response = postService.getPostByPostNo(member1.getMemberNo(), post.getPostNo());
+
+        assertNotNull(response);
+        assertEquals(post.getPostNo(), response.postNo());
+    }
+
+    @Test
+    @DisplayName("작성한 게시글 삭제 : success")
+    void testAddReportedCount() {
+        Post post = postList.get(0);
+        postService.addReportedCount(post.getPostNo());
+
+        Post updatedPost = postRepository.findById(post.getPostNo()).orElseThrow();
+        assertEquals(1, updatedPost.getReportCnt());
+    }
+
+    @Test
+    @DisplayName("신고 개수 0 리셋 : success")
+    void testResetReportedCount() {
+        Post post = postList.get(0);
+        postService.addReportedCount(post.getPostNo());
+        postService.addReportedCount(post.getPostNo());
+
+        postService.resetReportedCount(post.getPostNo());
+        assertEquals(0, post.getReportCnt());
+    }
+
+    @Test
+    @DisplayName("Distance formatting test (case 0)")
+    void testGetMainData_Distance() {
+
     }
 }

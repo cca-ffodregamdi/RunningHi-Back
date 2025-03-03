@@ -8,6 +8,7 @@ import com.runninghi.runninghibackv2.domain.entity.Record;
 import com.runninghi.runninghibackv2.domain.entity.vo.GpsDataVO;
 import com.runninghi.runninghibackv2.domain.repository.RecordQueryRepository;
 import com.runninghi.runninghibackv2.domain.repository.RecordRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,4 +59,5 @@ public class RecordService {
             throw e;
         }
     }
+
 }
