@@ -44,6 +44,7 @@ jacocoTestReport {
                             "**/version/**",
                             "**/config/**",
                             "**/dto/**",
+                            "**/exception/**",
                     ])
                 })
         )
