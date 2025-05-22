@@ -62,7 +62,7 @@ public class LogAspect {
         Object result = joinPoint.proceed();
 
         stopWatch.stop();
-        log.info("Execution time of {}.{}(): {} ms",
+        log.info("Ex ecution time of {}.{}(): {} ms",
                 joinPoint.getSignature().getDeclaringTypeName(),
                 joinPoint.getSignature().getName(),
                 stopWatch.getTotalTimeMillis());
