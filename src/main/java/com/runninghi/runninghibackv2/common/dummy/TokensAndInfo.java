@@ -9,6 +9,8 @@ public record TokensAndInfo(
         String refreshToken
 ) {
     public static TokensAndInfo from(Member member, String accessToken, String refreshToken) {
-        return new TokensAndInfo(member.getMemberNo(), member.getNickname(), accessToken, refreshToken);
+        // iOS가 기대하는 형태로 Bearer 접두사 추가
+        String formattedAccessToken = accessToken.startsWith("Bearer ") ? accessToken : "Bearer " + accessToken;
+        return new TokensAndInfo(member.getMemberNo(), member.getNickname(), formattedAccessToken, refreshToken);
     }
 }
