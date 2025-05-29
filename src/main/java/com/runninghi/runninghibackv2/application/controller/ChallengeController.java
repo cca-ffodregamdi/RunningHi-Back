@@ -35,6 +35,7 @@ public class ChallengeController {
 
     /**
      * 챌린지를 생성합니다.
+     *
      * @return 저장된 Challenge 데이터를 반환합니다.
      * @apiNote 관리자만 권한이 있습니다.
      */
