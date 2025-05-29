@@ -11,6 +11,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: dev
+    timeout-minutes: 15  # 전체 작업 타임아웃 설정
 
     steps:
       - name: Checkout repository
@@ -24,7 +25,13 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_SSH_PORT }}
+          timeout: 10m  # SSH 액션 타임아웃 설정
+          command_timeout: 10m  # 명령어 실행 타임아웃 설정
           script: |
+            set -e  # 에러 발생 시 스크립트 중단
+            
+            echo "=== Starting deployment process ==="
+            
             # 배포 서버에 host 키 확인
             sudo mkdir -p ~/.ssh && chmod 700 ~/.ssh
             sudo ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
@@ -49,38 +56,52 @@ jobs:
             echo "New container name: $CONTAINER_NAME"
             
             # Pull latest image
+            echo "=== Pulling latest Docker image ==="
             sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
             
             # 새로운 컨테이너 실행
-            echo 
+            echo "=== Starting new container ==="
             sudo docker run -d \
-            --name $CONTAINER_NAME \
-            --network host \
-            -v /home/ec2-user/logs:/app/logs \
-            -e SPRING_PROFILES_ACTIVE=dev \
-            -e SERVER_PORT=$NEW_PORT \
-            ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
+              --name $CONTAINER_NAME \
+              --network host \
+              -v /home/ec2-user/logs:/app/logs \
+              -e SPRING_PROFILES_ACTIVE=dev \
+              -e SERVER_PORT=$NEW_PORT \
+              ${{ secrets.DOCKERHUB_USERNAME }}/runninghi-prod:latest
             
-             # 새로운 컨테이너 상태 확인 (30초 대기 후 검사)
-             sleep 30
-             # if ! curl -s http://localhost:$NEW_PORT | grep -q 'UP'; then
-             #  echo "New container failed to start!"
-             #  sudo docker logs runninghi-prod-$NEW_PORT
-             #  exit 1
-             # fi
+            # 새로운 컨테이너 상태 확인 (30초 대기 후 검사)
+            echo "=== Waiting for container to start ==="
+            sleep 30
             
-            
-             # nginx 설정 변경 (새로운 포트로 트래픽 전환)
-             sudo sed -i "s/proxy_pass http:\/\/localhost:[0-9]\+/proxy_pass http:\/\/localhost:$NEW_PORT/" /etc/nginx/nginx.conf
-             sudo systemctl restart nginx
-      
-
-             # 이전 컨테이너 정리
-             if [ ! -z "$CURRENT_PORT" ]; then
-               echo "Cleaning up old containers on port $CURRENT_PORT"
-               OLD_CONTAINERS=$(sudo docker ps -a | grep "runninghi-prod-${CURRENT_PORT}" | awk '{print $1}')
-               for container in $OLD_CONTAINERS; do
-                 sudo docker stop $container || true
-                 sudo docker rm $container || true
-               done
+            # 컨테이너가 실행 중인지 확인
+            if ! sudo docker ps | grep -q "$CONTAINER_NAME"; then
+              echo "ERROR: New container failed to start!"
+              sudo docker logs $CONTAINER_NAME
+              exit 1
             fi
+            
+            # nginx 설정 변경 (새로운 포트로 트래픽 전환)
+            echo "=== Updating nginx configuration ==="
+            sudo sed -i "s/proxy_pass http:\/\/localhost:[0-9]\+/proxy_pass http:\/\/localhost:$NEW_PORT/" /etc/nginx/nginx.conf
+            sudo systemctl restart nginx
+            
+            # nginx 재시작 확인
+            if ! sudo systemctl is-active --quiet nginx; then
+              echo "ERROR: nginx failed to restart"
+              exit 1
+            fi
+            
+            # 이전 컨테이너 정리
+            if [ ! -z "$CURRENT_PORT" ] && [ "$CURRENT_PORT" != "$NEW_PORT" ]; then
+              echo "=== Cleaning up old containers on port $CURRENT_PORT ==="
+              OLD_CONTAINERS=$(sudo docker ps -a | grep "runninghi-prod-${CURRENT_PORT}" | awk '{print $1}' || true)
+              for container in $OLD_CONTAINERS; do
+                if [ ! -z "$container" ]; then
+                  echo "Stopping and removing container: $container"
+                  sudo docker stop $container || true
+                  sudo docker rm $container || true
+                fi
+              done
+            fi
+            
+            echo "=== Deployment completed successfully ==="
